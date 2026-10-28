@@ -181,3 +181,6 @@ vite.config.ts.timestamp-*
 # OS
 .DS_Store
 Thumbs.db
+
+# Personal notes (not committed)
+/notes

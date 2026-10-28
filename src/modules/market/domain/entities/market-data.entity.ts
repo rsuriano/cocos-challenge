@@ -1,10 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { dateTransformer } from '../../../../infrastructure/db/postgres/transformers/date.transformer';
 import { Instrument } from './instrument.entity';
 
 @Entity('marketdata')
+@Index('marketdata_instrumentid_date_idx', ['instrumentId', 'date'])
 export class MarketData {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ primaryKeyConstraintName: 'marketdata_pkey' })
   id: number;
 
   @Column({ name: 'instrumentid', type: 'integer', nullable: true })

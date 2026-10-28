@@ -1,11 +1,12 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Instrument } from './instrument.entity';
 import { OrderSide, OrderStatus, OrderType } from '../../types/order.types';
 import { User } from './user.entity';
 
 @Entity('orders')
+@Index('orders_userid_instrumentid_idx', ['userId', 'instrumentId'])
 export class Order {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ primaryKeyConstraintName: 'orders_pkey' })
   id: number;
 
   @Column({ name: 'instrumentid', type: 'integer', nullable: true })

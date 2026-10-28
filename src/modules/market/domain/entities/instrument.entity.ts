@@ -3,7 +3,7 @@ import { InstrumentType } from '../../types/instrument.types';
 
 @Entity('instruments')
 export class Instrument {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ primaryKeyConstraintName: 'instruments_pkey' })
   id: number;
 
   @Column({ type: 'varchar', length: 10, nullable: true })
