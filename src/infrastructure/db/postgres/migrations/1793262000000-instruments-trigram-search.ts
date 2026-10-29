@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class InstrumentsTrigramSearch1793420000000 implements MigrationInterface {
-  name = 'InstrumentsTrigramSearch1793420000000';
+export class InstrumentsTrigramSearch1793262000000 implements MigrationInterface {
+  name = 'InstrumentsTrigramSearch1793262000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
