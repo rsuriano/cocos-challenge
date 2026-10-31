@@ -142,6 +142,45 @@ describe('Orders (e2e)', () => {
     await req.expect(status);
   });
 
+  it('cancels a NEW order, releasing its reservation', async () => {
+    // 9200 cash available at this point; reserve 9000 of it.
+    const limit = await postOrder({ side: 'BUY', type: 'LIMIT', size: 90, price: '100' }).expect(
+      201,
+    );
+    await postOrder({ side: 'BUY', type: 'MARKET', size: 5 })
+      .expect(201)
+      .expect(res => expect(res.body.rejectionReason).toBe('INSUFFICIENT_FUNDS'));
+
+    const cancelled = await request(app.getHttpServer())
+      .post(`/orders/${limit.body.id}/cancel`)
+      .expect(200);
+    expect(cancelled.body).toMatchObject({ id: limit.body.id, status: 'CANCELLED' });
+
+    await postOrder({ side: 'BUY', type: 'MARKET', size: 5 })
+      .expect(201)
+      .expect(res => expect(res.body.status).toBe('FILLED'));
+  });
+
+  it('cancelling twice returns the same CANCELLED order', async () => {
+    const limit = await postOrder({ side: 'BUY', type: 'LIMIT', size: 1, price: '50' }).expect(201);
+    const url = `/orders/${limit.body.id}/cancel`;
+
+    const first = await request(app.getHttpServer()).post(url).expect(200);
+    const second = await request(app.getHttpServer()).post(url).expect(200);
+
+    expect(second.body).toEqual(first.body);
+  });
+
+  it('refuses to cancel a FILLED order', async () => {
+    const filled = await postOrder({ side: 'BUY', type: 'MARKET', size: 1 }).expect(201);
+
+    await request(app.getHttpServer()).post(`/orders/${filled.body.id}/cancel`).expect(409);
+  });
+
+  it('responds 404 when cancelling an unknown order', async () => {
+    await request(app.getHttpServer()).post('/orders/999999/cancel').expect(404);
+  });
+
   it('rejects trading a currency', async () => {
     await postOrder({ instrumentId: cash.id, side: 'BUY', type: 'MARKET', size: 1 }).expect(400);
   });

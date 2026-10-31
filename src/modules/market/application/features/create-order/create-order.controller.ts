@@ -3,7 +3,7 @@ import { ApiHeader, ApiTags } from '@nestjs/swagger';
 import { IdempotencyKey } from '../../../../../infrastructure/decorators/idempotency-key.decorator';
 import type { OrderRequestArgs } from '../../../domain/value-objects/order-request.value-object';
 import { CreateOrderFeature } from './create-order.feature';
-import { OrderDTO } from './order.dto';
+import { OrderDTO } from '../types/order.dto';
 
 @Controller()
 @ApiTags('Orders')

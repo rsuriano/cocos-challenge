@@ -21,7 +21,7 @@ export class ScreenOrderService {
       return { success: false, rejectionReason: OrderRejectionReason.INSUFFICIENT_FUNDS };
     }
 
-    if (!order.isBuy() && portfolio.availableQuantity(order.instrumentId!).lt(order.size)) {
+    if (order.isSell() && portfolio.availableQuantity(order.instrumentId!).lt(order.size)) {
       return { success: false, rejectionReason: OrderRejectionReason.INSUFFICIENT_SHARES };
     }
 

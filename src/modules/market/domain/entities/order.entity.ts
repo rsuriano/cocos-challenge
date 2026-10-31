@@ -1,3 +1,4 @@
+import { ConflictException } from '@nestjs/common';
 import Decimal from 'decimal.js';
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Instrument } from './instrument.entity';
@@ -75,8 +76,20 @@ export class Order {
     return this.side === OrderSide.BUY;
   }
 
+  isSell(): boolean {
+    return this.side === OrderSide.SELL;
+  }
+
   isMarket(): boolean {
     return this.type === OrderType.MARKET;
+  }
+
+  isNew(): boolean {
+    return this.status === OrderStatus.NEW;
+  }
+
+  isCancelled(): boolean {
+    return this.status === OrderStatus.CANCELLED;
   }
 
   total(): Decimal {
@@ -90,5 +103,13 @@ export class Order {
   reject(reason: OrderRejectionReason) {
     this.status = OrderStatus.REJECTED;
     this.rejectionReason = reason;
+  }
+
+  cancel() {
+    if (this.isCancelled()) return;
+    if (!this.isNew()) {
+      throw new ConflictException(`A ${this.status} order can't be cancelled`);
+    }
+    this.status = OrderStatus.CANCELLED;
   }
 }
