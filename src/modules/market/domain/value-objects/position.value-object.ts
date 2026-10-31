@@ -14,7 +14,7 @@ export class Position {
   // Weighted average cost over every FILLED buy: sells reduce the quantity but
   // don't change the average. It doesn't reset if the position is fully closed
   // and reopened.
-  static create(totals: PortfolioTotals, marketData: MarketData | null): Position {
+  static create(totals: PortfolioTotals): Position {
     const boughtQuantity = new Decimal(totals.boughtQuantity);
     const quantity = boughtQuantity.minus(totals.soldQuantity);
     const averageCost = boughtQuantity.isZero()
@@ -23,10 +23,20 @@ export class Position {
 
     return new Position(
       { id: totals.instrumentId, ticker: totals.ticker, name: totals.name },
-      marketData,
+      null,
       quantity,
       new Decimal(totals.reservedQuantity),
       averageCost,
+    );
+  }
+
+  priced(marketData: MarketData | null): Position {
+    return new Position(
+      this.instrument,
+      marketData,
+      this.quantity,
+      this.reservedQuantity,
+      this.averageCost,
     );
   }
 
@@ -34,7 +44,11 @@ export class Position {
     return this.quantity.gt(0);
   }
 
-  // null when the instrument has no price yet.
+  // Shares already committed to NEW sell orders can't be sold again.
+  availableQuantity(): Decimal {
+    return this.quantity.minus(this.reservedQuantity);
+  }
+
   marketValue(): Decimal | null {
     const close = this.marketData?.close;
     if (close === null || close === undefined) return null;

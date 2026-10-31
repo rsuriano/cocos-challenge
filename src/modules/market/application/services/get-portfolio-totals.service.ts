@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Order } from '../../domain/entities/order.entity';
 import { OrderSide, OrderStatus } from '../../types/order.types';
 import { PortfolioTotals } from '../../types/portfolio.types';
@@ -16,8 +16,10 @@ export class GetPortfolioTotalsService {
     private readonly orderRepository: Repository<Order>,
   ) {}
 
-  async execute(userId: number): Promise<PortfolioTotals[]> {
-    return this.orderRepository
+  async execute(userId: number, manager?: EntityManager): Promise<PortfolioTotals[]> {
+    const repository = manager?.getRepository(Order) ?? this.orderRepository;
+
+    return repository
       .createQueryBuilder('o')
       .innerJoin('o.instrument', 'i')
       .select('o.instrumentid', 'instrumentId')

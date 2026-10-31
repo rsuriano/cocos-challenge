@@ -1,10 +1,12 @@
+import Decimal from 'decimal.js';
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Instrument } from './instrument.entity';
-import { OrderSide, OrderStatus, OrderType } from '../../types/order.types';
+import { OrderRejectionReason, OrderSide, OrderStatus, OrderType } from '../../types/order.types';
 import { User } from './user.entity';
 
 @Entity('orders')
 @Index('orders_userid_instrumentid_idx', ['userId', 'instrumentId'])
+@Index('orders_userid_idempotencykey_key', ['userId', 'idempotencyKey'], { unique: true })
 export class Order {
   @PrimaryGeneratedColumn({ primaryKeyConstraintName: 'orders_pkey' })
   id: number;
@@ -40,4 +42,53 @@ export class Order {
 
   @Column({ name: 'datetime', type: 'timestamp without time zone', nullable: true })
   datetime: Date | null;
+
+  @Column({ name: 'idempotencykey', type: 'uuid', nullable: true })
+  idempotencyKey: string | null;
+
+  @Column({ name: 'rejectionreason', type: 'varchar', length: 30, nullable: true })
+  rejectionReason: OrderRejectionReason | null;
+
+  create(args: {
+    userId: number;
+    instrumentId: number;
+    side: OrderSide;
+    type: OrderType;
+    size: number;
+    price: string | null;
+    idempotencyKey: string;
+  }): Order {
+    const order = new Order();
+    order.userId = args.userId;
+    order.instrumentId = args.instrumentId;
+    order.side = args.side;
+    order.type = args.type;
+    order.size = args.size;
+    order.price = args.price;
+    order.status = OrderStatus.NEW;
+    order.datetime = new Date();
+    order.idempotencyKey = args.idempotencyKey;
+    return order;
+  }
+
+  isBuy(): boolean {
+    return this.side === OrderSide.BUY;
+  }
+
+  isMarket(): boolean {
+    return this.type === OrderType.MARKET;
+  }
+
+  total(): Decimal {
+    return new Decimal(this.price ?? 0).times(this.size ?? 0);
+  }
+
+  fill() {
+    this.status = OrderStatus.FILLED;
+  }
+
+  reject(reason: OrderRejectionReason) {
+    this.status = OrderStatus.REJECTED;
+    this.rejectionReason = reason;
+  }
 }

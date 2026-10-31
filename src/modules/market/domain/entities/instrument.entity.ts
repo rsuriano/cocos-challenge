@@ -17,4 +17,8 @@ export class Instrument {
 
   @Column({ type: 'varchar', length: 10, nullable: true })
   type: InstrumentType | null;
+
+  isTradable(): boolean {
+    return this.type === InstrumentType.ACCIONES;
+  }
 }

@@ -4,6 +4,12 @@ import { Instrument } from './domain/entities/instrument.entity';
 import { MarketData } from './domain/entities/market-data.entity';
 import { Order } from './domain/entities/order.entity';
 import { User } from './domain/entities/user.entity';
+import { CreateOrderController } from './application/features/create-order/create-order.controller';
+import { CreateOrderFeature } from './application/features/create-order/create-order.feature';
+import { GetInstrumentByIdService } from './application/services/get-instrument-by-id.service';
+import { GetOrderByIdempotencyKeyService } from './application/services/get-order-by-idempotency-key.service';
+import { LockUserService } from './application/services/lock-user.service';
+import { ScreenOrderService } from './application/services/screen-order.service';
 import { GetInstrumentsController } from './application/features/get-instruments/get-instruments.controller';
 import { GetInstrumentsFeature } from './application/features/get-instruments/get-instruments.feature';
 import { GetPortfolioController } from './application/features/get-portfolio/get-portfolio.controller';
@@ -15,7 +21,7 @@ import { GetUserByIdService } from './application/services/get-user-by-id.servic
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Instrument, MarketData, Order])],
-  controllers: [GetPortfolioController, GetInstrumentsController],
+  controllers: [GetPortfolioController, GetInstrumentsController, CreateOrderController],
   providers: [
     GetPortfolioFeature,
     GetUserByIdService,
@@ -23,6 +29,11 @@ import { GetUserByIdService } from './application/services/get-user-by-id.servic
     GetLatestMarketDataService,
     GetInstrumentsFeature,
     SearchInstrumentsService,
+    CreateOrderFeature,
+    LockUserService,
+    GetOrderByIdempotencyKeyService,
+    GetInstrumentByIdService,
+    ScreenOrderService,
   ],
 })
 export class MarketModule {}

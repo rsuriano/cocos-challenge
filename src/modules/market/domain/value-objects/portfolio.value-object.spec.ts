@@ -19,20 +19,17 @@ describe('Portfolio', () => {
     Object.assign(new MarketData(), { instrumentId, close, previousClose: close });
 
   it('adds up cash across instruments and keeps only open positions', () => {
-    const portfolio = Portfolio.create(
-      [
-        row({ instrumentId: 1, cashBalance: '1000' }),
-        row({
-          instrumentId: 2,
-          boughtQuantity: '10',
-          boughtCost: '1000',
-          cashBalance: '-1000',
-          reservedCash: '200',
-        }),
-        row({ instrumentId: 3, boughtQuantity: '5', boughtCost: '50', soldQuantity: '5' }),
-      ],
-      [price(2, '150')],
-    );
+    const portfolio = Portfolio.create([
+      row({ instrumentId: 1, cashBalance: '1000' }),
+      row({
+        instrumentId: 2,
+        boughtQuantity: '10',
+        boughtCost: '1000',
+        cashBalance: '-1000',
+        reservedCash: '200',
+      }),
+      row({ instrumentId: 3, boughtQuantity: '5', boughtCost: '50', soldQuantity: '5' }),
+    ]).priced([price(2, '150')]);
 
     expect(portfolio.positions.map(p => p.instrument.id)).toEqual([2]);
     expect(portfolio.availableCash.toString()).toBe('-200');
@@ -42,10 +39,9 @@ describe('Portfolio', () => {
   });
 
   it('excludes positions without a price from the total', () => {
-    const portfolio = Portfolio.create(
-      [row({ instrumentId: 2, boughtQuantity: '10', boughtCost: '1000', cashBalance: '500' })],
-      [],
-    );
+    const portfolio = Portfolio.create([
+      row({ instrumentId: 2, boughtQuantity: '10', boughtCost: '1000', cashBalance: '500' }),
+    ]).priced([]);
 
     expect(portfolio.positions).toHaveLength(1);
     expect(portfolio.totalValue().toString()).toBe('500');

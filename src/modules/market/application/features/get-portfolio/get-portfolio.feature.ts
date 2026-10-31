@@ -24,7 +24,7 @@ export class GetPortfolioFeature {
       totals.map(row => row.instrumentId),
     );
 
-    const portfolio = Portfolio.create(totals, latestMarketData);
+    const portfolio = Portfolio.create(totals).priced(latestMarketData);
 
     return PortfolioDTO.create(user.id, portfolio);
   }
